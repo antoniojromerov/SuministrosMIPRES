@@ -1,0 +1,136 @@
+---
+title: "SuministrosMIPRES"
+author: "Antonio Romero"
+date: "11/4/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+El Sistema General de Seguridad Social en Salud cuenta con mecanismos de financiación para garantizar el acceso y la prestación de servicios y tecnologías en salud. El principal mecanismo de financiación es la Unidad de Pago por Capitación o UPC, la cual constituye la prima mensual que es asignada a cada una de las Entidades Promotoras de Salud para la cobertura de el Plan Básico de Salud o PBS, este inluye el listado de servicios a los cuales tiene acceso un paciente. 
+
+En el caso de que un paciente requiera acceder a un servicio o tecnología no incluido en el PBS y no financiado con cargo a la UPS, la EPS junto con la Institución Prestadora de Servicios de Salud - IPS, deberá hacer uso de una herramienta tecnológica denominada MIPRES que permite a los profesionales de salud reportar la prescripción de tecnologías en salud o servicios complementarios no financiados con recursos de la UPC.
+
+Luego de acceder a la base de datos de suministros generada en MIPRES desde el año 2016 a la fecha, a continuación, se detalla los días promedio transcurridos entre la prescripción de un médicamento y la entrega del mismo (tiempo de respuesta), teniendo en cuenta el número correspondiente a la entrega del medicamento al paciente, y se puede evidenciar, teniendo en cuenta el periodo de análisis entre el 2016 a la fecha, periodo de funcionamiento de MIPRES, los días promedio transcurridos entre la prescripción y el suministro de la primera entrega de un medicamento son 89 días.
+
+Vale la pena indicar, que se encuentra registro desde la primera entrega hasta la entrega 108 de medicamentos, con lo cual se hace necesario determinar las diferencias entre las entregas consecutivas para determinar si existe algún comportamiento entre las mismas.
+
+```{r Tiempos}
+knitr::opts_chunk$set(echo = FALSE)
+plot(PTDPrimeraEntrega$FechaPrescripcion, PTDPrimeraEntrega$Diferencia, type="p", col="blue")
+```
+
+
+```{r RespuestaPromedioPrimeraEntrega}
+knitr::opts_chunk$set(echo = FALSE)
+
+PTD_tbl %>%
+  filter(NoEntrega == 1) %>%
+  summarise(
+    Promedio_entrega = mean(Diferencia, na.rm = TRUE)
+  )
+```
+
+Teniendo en cuenta sólo los tiempos de suministro de la primera entrega de los medicamentos, se calculó el tiempo promedio transcurrido entre la fecha de prescripción y el suministro del medicamento para cada mes. A continuación se evidencia el comportamiento para las fechas de entrega del año 2020.
+
+```{r echo = FALSE}
+ggplot(data = PTDPrimeraEntrega2019_2010_tbl) + aes(FechaSuministro, Diferencia) +
+  geom_line(color="#69b3a2")
+```
+
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+
+PTDPrimeraEntrega_mun %>%
+  group_by(nombre) %>%
+  summarise(
+            meanDiferencia = mean(Diferencia),
+            maxDiferencia = max(Diferencia),
+            minDiferencia = min(Diferencia),
+            numPresc = n_distinct(Id_Prescripcion)
+            ) %>%
+  arrange(meanDiferencia)
+```
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+
+PTDPrimeraEntrega_mun %>%
+  group_by(CodEPS) %>%
+  summarise(
+            meanDiferencia = mean(Diferencia),
+            maxDiferencia = max(Diferencia),
+            minDiferencia = min(Diferencia),
+            numPresc = n_distinct(Id_Prescripcion)
+            ) %>%
+  arrange(CodEPS)
+```
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+
+PTDPrimeraEntrega_mun %>%
+  group_by(CodDxPpal) %>%
+  summarise(
+            meanDiferencia = mean(Diferencia),
+            maxDiferencia = max(Diferencia),
+            minDiferencia = min(Diferencia),
+            numPresc = n_distinct(Id_Prescripcion)
+            ) %>%
+  arrange(meanDiferencia)
+```
+
+```{r}
+PTDPrimeraEntrega_mun %>%
+  group_by(nombre) %>%
+  summarise(
+            meanDiferencia = mean(Diferencia),
+            maxDiferencia = max(Diferencia),
+            minDiferencia = min(Diferencia),
+            numPresc = n_distinct(Id_Prescripcion)
+            ) %>%
+  arrange(nombre)
+```
+
+```{r}
+PTDPrimeraEntrega_mun %>%
+  filter(year(FechaPrescripcion)=="2020") %>%
+  group_by(nombre) %>%
+  summarise(
+            meanDiferencia = mean(Diferencia),
+            maxDiferencia = max(Diferencia),
+            minDiferencia = min(Diferencia),
+            numPresc = n_distinct(Id_Prescripcion)
+            ) %>%
+  arrange(nombre)
+```
+
+```{r}
+PTDPrimeraEntrega_mun %>%
+  filter(year(FechaPrescripcion)=="2019") %>%
+  group_by(CodEPS) %>%
+  summarise(
+            meanDiferencia = mean(Diferencia),
+            maxDiferencia = max(Diferencia),
+            minDiferencia = min(Diferencia),
+            numPresc = n_distinct(Id_Prescripcion)
+            ) %>%
+  arrange(CodEPS)
+```
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+#knitr::opts_chunk$set(echo = FALSE)
+
+#colmap(municipios, subset(PromedioDiasPrescripcionMun), var = "meanDiferencia")
+```
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
