@@ -61,7 +61,7 @@ PrimeraEntregaSuministros_tbl %>%
             minDiferencia = min(Diferencia),
             numPresc = n_distinct(Id_Prescripcion)
             ) %>%
-  arrange(meanDiferencia)
+  arrange(desc(meanDiferencia))
 ```
 
 ```{r tablaMunicipios, echo=FALSE}
