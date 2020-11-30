@@ -48,8 +48,8 @@ Municipios_DANE <- read_delim("~/Downloads/municipios.csv",
 #-----------------------------------------------------------------
 TiemposSuministros <- filter(Prescripciones_20201026, EstPres == 4)
 TiemposSuministros <- select(TiemposSuministros, ID_Prescripcion, FPrescripcion)
-TiemposSuministros <- merge(TiemposSuministros, Direccionamientos_20201026, by.x = "ID_Prescripcion", 
-                 by.y = "Id_Prescripcion")
+TiemposSuministros <- merge(TiemposSuministros, Direccionamientos_20201026, 
+                            by.x = "ID_Prescripcion", by.y = "Id_Prescripcion")
 
 #Cambiando el nombre de las columnas
 #-----------------------------------
@@ -143,8 +143,7 @@ spark_conn <- spark_connect(master="local", config = conf)
 
 # Copiando datos a Spark
 #-----------------------
-PrimeraEntrega_tbl <- copy_to(spark_conn, PrimeraEntrega)
-Municipios_tbl <- copy_to(spark_conn, Municipios_DANE)
+PrimeraEntregaSuministros_tbl <- copy_to(spark_conn, PrimeraEntregaSuministros)
 
 #Listando los data frames disponibles en Spark
 #---------------------------------------------
@@ -153,54 +152,30 @@ src_tbls(spark_conn)
 #Viendo qué tan grande es el dataset
 #-----------------------------------
 dim(PrimeraEntrega_tbl)
-dim(Municipios_tbl)
 
 #Viendo qué tan pequeño es el tibble
 #-----------------------------------
 object_size(PrimeraEntrega_tbl)
-object_size(Municipios_tbl)
 
 #---------------------------------------------
 #Analizando datos desde Spark
 #---------------------------------------------
 
-#Creando dataframe de entregas por municipio
-#-------------------------------------------
-PrimeraEntrega_mun <- left_join(PrimeraEntrega_tbl, Municipios_tbl, 
-                                by = c("CodDANEMunIPS"="CODIGO_MUNICIPIO"))
-PrimeraEntrega_mun_DF <- collect(PTDPrimeraEntrega_mun)
-
-
 #Creando el DF y consultando los tiempos de entrega en el año 2019 y 2020
 #------------------------------------------------------------------------
-PrimeraEntrega20192020_tbl <- filter(PrimeraEntrega_tbl, year(FechaPrescripcion) >= 2019 
-                                         & year(FechaPrescripcion) <=2020)
-
-
-#Consultado el tiempo promedio de entrega por cada número de entrega
-#-------------------------------------------------------------------
-PTD_tbl %>%
-  group_by(NoEntrega) %>%
-  arrange(NoEntrega) %>%
-  summarise(
-    Promedio_entrega = mean(Diferencia, na.rm = TRUE)
-  )
+PrimeraEntrega2019_tbl <- filter(PrimeraEntregaSuministros_tbl, year(FechaPrescripcion) == 2019)
+PrimeraEntrega2020_tbl <- filter(PrimeraEntregaSuministros_tbl, year(FechaPrescripcion) == 2020)
 
 #Creando DF y consultando el tiempo promedio por cada mes de prescripción
 #-----------------------------------------------------------------------
-TiempoPromedioMensual_tbl <- PTDPrimeraEntrega_tbl %>%
-  mutate(yearPresc = year(FechaPrescripcion), monthPresc = month(FechaPrescripcion)) %>%
-  group_by(yearPresc, monthPresc) %>%
-  arrange(yearPresc, monthPresc) %>%
+TiempoPromedioMensual2020_tbl <- PrimeraEntrega2020_tbl %>%
+  mutate(monthPresc = month(FechaPrescripcion)) %>%
+  group_by(monthPresc) %>%
   summarise(meanDiferencia = mean(Diferencia),
             maxDiferencia = max(Diferencia),
             minDiferencia = min(Diferencia),
             numPresc = n_distinct(Id_Prescripcion)
             )
-
-TiempoPromedioMensual <- collect(TiempoPromedioMensual_tbl)
-TiempoPromedioMensual2020 <- filter(TiempoPromedioMensual, yearPresc == 2020)
-
 
 #Analizando entregas en municipios
 #---------------------------------

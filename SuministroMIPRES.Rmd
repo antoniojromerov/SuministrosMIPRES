@@ -15,17 +15,16 @@ Luego de acceder a la base de datos de suministros generada en MIPRES desde el a
 
 Vale la pena indicar, que se encuentra registro desde la primera entrega hasta la entrega 108 de medicamentos, con lo cual se hace necesario determinar las diferencias entre las entregas consecutivas para determinar si existe algún comportamiento entre las mismas.
 
-```{r Tiempos}
+```{r Tiempos Suministro}
 knitr::opts_chunk$set(echo = FALSE)
-plot(PTDPrimeraEntrega$FechaPrescripcion, PTDPrimeraEntrega$Diferencia, type="p", col="blue")
+plot(PrimeraEntregaSuministros$FechaPrescripcion, PrimeraEntregaSuministros$Diferencia, type="p", col="blue")
 ```
 
 
 ```{r RespuestaPromedioPrimeraEntrega}
 knitr::opts_chunk$set(echo = FALSE)
 
-PTD_tbl %>%
-  filter(NoEntrega == 1) %>%
+PrimeraEntregaSuministros_tbl %>%
   summarise(
     Promedio_entrega = mean(Diferencia, na.rm = TRUE)
   )
@@ -33,30 +32,16 @@ PTD_tbl %>%
 
 Teniendo en cuenta sólo los tiempos de suministro de la primera entrega de los medicamentos, se calculó el tiempo promedio transcurrido entre la fecha de prescripción y el suministro del medicamento para cada mes. A continuación se evidencia el comportamiento para las fechas de entrega del año 2020.
 
+## Including Plots
+
 ```{r echo = FALSE}
-ggplot(data = PTDPrimeraEntrega2019_2010_tbl) + aes(FechaSuministro, Diferencia) +
+ggplot(data = TiempoPromedioMensual2020_tbl) + aes(monthPresc, meanDiferencia) +
   geom_line(color="#69b3a2")
 ```
 
 
-```{r}
-knitr::opts_chunk$set(echo = TRUE)
-
-PTDPrimeraEntrega_mun %>%
-  group_by(nombre) %>%
-  summarise(
-            meanDiferencia = mean(Diferencia),
-            maxDiferencia = max(Diferencia),
-            minDiferencia = min(Diferencia),
-            numPresc = n_distinct(Id_Prescripcion)
-            ) %>%
-  arrange(meanDiferencia)
-```
-
-```{r}
-knitr::opts_chunk$set(echo = TRUE)
-
-PTDPrimeraEntrega_mun %>%
+```{r tablaEPS, echo=FALSE}
+PrimeraEntregaSuministros_tbl %>%
   group_by(CodEPS) %>%
   summarise(
             meanDiferencia = mean(Diferencia),
@@ -64,13 +49,11 @@ PTDPrimeraEntrega_mun %>%
             minDiferencia = min(Diferencia),
             numPresc = n_distinct(Id_Prescripcion)
             ) %>%
-  arrange(CodEPS)
+  arrange(desc(meanDiferencia))
 ```
 
-```{r}
-knitr::opts_chunk$set(echo = TRUE)
-
-PTDPrimeraEntrega_mun %>%
+```{r tablaDx, echo = FALSE}
+PrimeraEntregaSuministros_tbl %>%
   group_by(CodDxPpal) %>%
   summarise(
             meanDiferencia = mean(Diferencia),
@@ -81,8 +64,8 @@ PTDPrimeraEntrega_mun %>%
   arrange(meanDiferencia)
 ```
 
-```{r}
-PTDPrimeraEntrega_mun %>%
+```{r tablaMunicipios, echo=FALSE}
+PrimeraEntregaSuministros_tbl %>%
   group_by(nombre) %>%
   summarise(
             meanDiferencia = mean(Diferencia),
@@ -90,47 +73,8 @@ PTDPrimeraEntrega_mun %>%
             minDiferencia = min(Diferencia),
             numPresc = n_distinct(Id_Prescripcion)
             ) %>%
-  arrange(nombre)
-```
-
-```{r}
-PTDPrimeraEntrega_mun %>%
-  filter(year(FechaPrescripcion)=="2020") %>%
-  group_by(nombre) %>%
-  summarise(
-            meanDiferencia = mean(Diferencia),
-            maxDiferencia = max(Diferencia),
-            minDiferencia = min(Diferencia),
-            numPresc = n_distinct(Id_Prescripcion)
-            ) %>%
-  arrange(nombre)
-```
-
-```{r}
-PTDPrimeraEntrega_mun %>%
-  filter(year(FechaPrescripcion)=="2019") %>%
-  group_by(CodEPS) %>%
-  summarise(
-            meanDiferencia = mean(Diferencia),
-            maxDiferencia = max(Diferencia),
-            minDiferencia = min(Diferencia),
-            numPresc = n_distinct(Id_Prescripcion)
-            ) %>%
-  arrange(CodEPS)
+  arrange(desc(meanDiferencia))
 ```
 
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-#knitr::opts_chunk$set(echo = FALSE)
-
-#colmap(municipios, subset(PromedioDiasPrescripcionMun), var = "meanDiferencia")
-```
-
-
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
