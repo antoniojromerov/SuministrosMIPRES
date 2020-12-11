@@ -51,10 +51,16 @@ TiemposSuministros <- select(TiemposSuministros, ID_Prescripcion, FPrescripcion)
 TiemposSuministros <- merge(TiemposSuministros, Direccionamientos_20201026, 
                             by.x = "ID_Prescripcion", by.y = "Id_Prescripcion")
 
+TiemposSuministros_NAsIncluidos <- merge(TiemposSuministros, Direccionamientos_20201026, 
+                            by.x = "ID_Prescripcion", by.y = "Id_Prescripcion", all.x = TRUE)
+
 #Cambiando el nombre de las columnas
 #-----------------------------------
 names(TiemposSuministros) = c("Id_Prescripcion","FechaPrescripcion","ConsecutivoTecnologia",
                    "NoEntrega", "FechaDireccionamiento")
+
+names(TiemposSuministros_NAsIncluidos) = c("Id_Prescripcion","FechaPrescripcion","ConsecutivoTecnologia",
+                              "NoEntrega", "FechaDireccionamiento")
 
 #Continuando con la seleccion de datos, uniendo las diferentes bases de datos importadas
 #---------------------------------------------------------------------------------------
@@ -70,6 +76,32 @@ TiemposSuministros <- merge(TiemposSuministros, Suministros_20201026, by = c("Id
                                                           "ConsecutivoTecnologia",
                                                           "NoEntrega"))
 
+
+#Teniendo en cuenta los NAs
+TiemposSuministros_NAsIncluidos <- merge(TiemposSuministros_NAsIncluidos, 
+                                         Entregas_20201026, by = c("Id_Prescripcion",
+                                                                   "ConsecutivoTecnologia", 
+                                                                   "NoEntrega"), all.x = TRUE)
+                                         
+TiemposSuministros_NAsIncluidos <- merge(TiemposSuministros_NAsIncluidos, 
+                                         Programaciones_20201026, by = c("Id_Prescripcion", 
+                                                                         "ConsecutivoTecnologia", 
+                                                                         "NoEntrega"), 
+                                         all.x = TRUE)
+
+TiemposSuministros_NAsIncluidos <-merge(TiemposSuministros_NAsIncluidos, 
+                                        ReporteEntregas_20201026, by = c("Id_Prescripcion",
+                                                                          "ConsecutivoTecnologia",
+                                                                          "NoEntrega"), 
+                                        all.x = TRUE)
+
+TiemposSuministros_NAsIncluidos <- merge(TiemposSuministros_NAsIncluidos, 
+                                         Suministros_20201026, by = c("Id_Prescripcion",
+                                                                      "ConsecutivoTecnologia",
+                                                                      "NoEntrega")
+                                         , all.x = TRUE)
+
+
 #Convirtiendo las variables de fecha en "Date"
 #--------------------------------------------
 TiemposSuministros$FechaDireccionamiento <- as.Date(TiemposSuministros$FechaDireccionamiento)
@@ -78,6 +110,14 @@ TiemposSuministros$FechaPrescripcion <- as.Date(TiemposSuministros$FechaPrescrip
 TiemposSuministros$FechaProgramacion <- as.Date(TiemposSuministros$FechaProgramacion)
 TiemposSuministros$FechaReporteEntrega <- as.Date(TiemposSuministros$FechaReporteEntrega)
 TiemposSuministros$FechaSuministro <- as.Date(TiemposSuministros$FechaSuministro)
+
+TiemposSuministros_NAsIncluidos$FechaDireccionamiento <- as.Date(TiemposSuministros_NAsIncluidos$FechaDireccionamiento)
+TiemposSuministros_NAsIncluidos$FechaEntrega <- as.Date(TiemposSuministros_NAsIncluidos$FechaEntrega)
+TiemposSuministros_NAsIncluidos$FechaPrescripcion <- as.Date(TiemposSuministros_NAsIncluidos$FechaPrescripcion)
+TiemposSuministros_NAsIncluidos$FechaProgramacion <- as.Date(TiemposSuministros_NAsIncluidos$FechaProgramacion)
+TiemposSuministros_NAsIncluidos$FechaReporteEntrega <- as.Date(TiemposSuministros_NAsIncluidos$FechaReporteEntrega)
+TiemposSuministros_NAsIncluidos$FechaSuministro <- as.Date(TiemposSuministros_NAsIncluidos$FechaSuministro)
+
 
 #Seleccionando datos de prescripción
 #-----------------------------------
@@ -103,9 +143,13 @@ TiemposSuministros <- merge(TiemposSuministros, Municipios_DANE, by.x = "CodDANE
 #-----------------------------------------------------------------------
 PrimeraEntregaSuministros <- filter(TiemposSuministros, NoEntrega == "1")
 
+PrimeraEntregaSuministros_NAsIncluidos <- filter(TiemposSuministros_NAsIncluidos, NoEntrega == "1")
+
 #Exportando el dataframe de las primeras entregas
 #------------------------------------------------
 write.csv(PrimeraEntregaSuministros, file = "PrimeraEntregaSuministros.csv")
+
+write.csv(PrimeraEntregaSuministros_NAsIncluidos, file = "PrimeraEntregaSuministros_NAsIncluidos.csv")
 
 #Se importa el anterior DF para disminuir el tamaño del environment
 #----------------------------------------------------------------------------------------------
@@ -166,10 +210,12 @@ object_size(PrimeraEntrega_tbl)
 PrimeraEntrega2019_tbl <- filter(PrimeraEntregaSuministros_tbl, year(FechaPrescripcion) == 2019)
 PrimeraEntrega2020_tbl <- filter(PrimeraEntregaSuministros_tbl, year(FechaPrescripcion) == 2020)
 
+PrimeraEntrega2020_tbl %>% mutate(MesSuministro = month(FechaSuministro))
+
 #Creando DF y consultando el tiempo promedio por cada mes de prescripción
 #-----------------------------------------------------------------------
-TiempoPromedioMensual2020_tbl <- PrimeraEntrega2020_tbl %>%
-  mutate(monthPresc = month(FechaPrescripcion)) %>%
+PrimeraEntrega2020_tbl %>%
+  mutate(MesSuministro = month(FechaSuministro)) %>%
   group_by(monthPresc) %>%
   summarise(meanDiferencia = mean(Diferencia),
             maxDiferencia = max(Diferencia),
@@ -177,5 +223,8 @@ TiempoPromedioMensual2020_tbl <- PrimeraEntrega2020_tbl %>%
             numPresc = n_distinct(Id_Prescripcion)
             )
 
-#Analizando entregas en municipios
-#---------------------------------
+
+#Contando las prescripciones sin tiempo de suministro
+#----------------------------------------------------
+
+

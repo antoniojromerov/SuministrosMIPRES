@@ -17,7 +17,7 @@ Vale la pena indicar, que se encuentra registro desde la primera entrega hasta l
 
 ```{r Tiempos Suministro}
 knitr::opts_chunk$set(echo = FALSE)
-plot(PrimeraEntregaSuministros$FechaPrescripcion, PrimeraEntregaSuministros$Diferencia, type="p", col="blue")
+plot(PrimeraEntregaSuministros$FechaPrescripcion, PrimeraEntregaSuministros$Diferencia, type="p", col="blue", xlab = "Fecha prescripción", ylab = "Cantidad de días")
 ```
 
 
@@ -27,6 +27,14 @@ knitr::opts_chunk$set(echo = FALSE)
 PrimeraEntregaSuministros_tbl %>%
   summarise(
     Promedio_entrega = mean(Diferencia, na.rm = TRUE)
+  )
+```
+
+```{r CantidadPrescripciones}
+
+PrimeraEntregaSuministros_tbl %>%
+  summarise(
+    Cantidad_prescripciones = n_distinct(Id_Prescripcion)
   )
 ```
 
@@ -76,5 +84,36 @@ PrimeraEntregaSuministros_tbl %>%
   arrange(desc(meanDiferencia))
 ```
 
+```{R}
+PrimeraEntrega2020_tbl %>%
+  mutate(MesSuministro = month(FechaSuministro)) %>%
+  group_by(MesSuministro) %>%
+  summarise(meanDiferencia = mean(Diferencia),
+            maxDiferencia = max(Diferencia),
+            minDiferencia = min(Diferencia),
+            numPresc = n_distinct(Id_Prescripcion)) %>%
+  arrange(MesSuministro)
+```
 
 
+
+```{R ContandoFechaSuministroNAs}
+
+PrimeraEntregaSuministros_NAsIncluidos %>%
+  filter(is.na(FechaSuministro)) %>%
+  summarise(CantidadPrescripcionesFechaSuministroNAs = n_distinct(Id_Prescripcion))
+```
+
+```{R ContandoFechaSuministroNAs}
+
+PrimeraEntregaSuministros_NAsIncluidos %>%
+  filter(FechaSuministro >1 ) %>%
+  summarise(CantidadPrescripcionesFechaSuministro = n_distinct(Id_Prescripcion))
+```
+
+
+```{R ContandoFechaSuministroNAs}
+
+PrimeraEntregaSuministros_NAsIncluidos %>%
+  summarise(CantidadPrescripciones = n_distinct(Id_Prescripcion))
+```
