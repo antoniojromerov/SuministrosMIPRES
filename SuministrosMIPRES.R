@@ -20,25 +20,25 @@ tinytex::install_tinytex()
 
 #Importando los datos
 #--------------------
-Suministros_20201026 <- read_delim("Suministros_20201026.txt", 
+Suministros_20201130 <- read_delim("Suministros_20201130.txt", 
                                      "|", escape_double = FALSE, trim_ws = TRUE)
 
-ReporteEntregas_20201026 <- read_delim("ReporteEntregas_20201026.txt", 
+ReporteEntregas_20201130 <- read_delim("ReporteEntregas_20201130.txt", 
                                          "|", escape_double = FALSE, trim_ws = TRUE)
 
-Entregas_20201026 <- read_delim("Entregas_20201026.txt", 
+Entregas_20201130 <- read_delim("Entregas_20201130.txt", 
                                 "|", escape_double = FALSE, trim_ws = TRUE)
 
-Programaciones_20201026 <- read_delim("Programaciones_20201026.txt", 
+Programaciones_20201130 <- read_delim("Programaciones_20201130.txt", 
                                       "|", escape_double = FALSE, trim_ws = TRUE)
 
-Direccionamientos_20201026 <- read_delim("Direccionamientos_20201026.txt", 
+Direccionamientos_20201130 <- read_delim("Direccionamientos_20201130.txt", 
                                          "|", escape_double = FALSE, trim_ws = TRUE)
 
-Medicamentos_20201026 <- read_delim("Medicamentos_20201026.txt", 
+Medicamentos_20201130 <- read_delim("Medicamentos_20201130.txt", 
                                     "|", escape_double = FALSE, trim_ws = TRUE)
 
-Prescripciones_20201026 <- read_delim("Prescripciones_20201026.txt", 
+Prescripciones_20201130 <- read_delim("Prescripciones_20201130.txt", 
                                       "|", escape_double = FALSE, trim_ws = TRUE)
 
 Municipios_DANE <- read_delim("~/Downloads/municipios.csv", 
@@ -46,60 +46,39 @@ Municipios_DANE <- read_delim("~/Downloads/municipios.csv",
 
 #Filtran los datos y seleccionando los necesarios para el análisis
 #-----------------------------------------------------------------
-TiemposSuministros <- filter(Prescripciones_20201026, EstPres == 4)
+TiemposSuministros <- filter(Prescripciones_20201130, EstPres == 4)
 TiemposSuministros <- select(TiemposSuministros, ID_Prescripcion, FPrescripcion)
-TiemposSuministros <- merge(TiemposSuministros, Direccionamientos_20201026, 
-                            by.x = "ID_Prescripcion", by.y = "Id_Prescripcion")
-
-TiemposSuministros_NAsIncluidos <- merge(TiemposSuministros, Direccionamientos_20201026, 
-                            by.x = "ID_Prescripcion", by.y = "Id_Prescripcion", all.x = TRUE)
+TiemposSuministros <- merge(TiemposSuministros, Direccionamientos_20201130, 
+                                         by.x = "ID_Prescripcion", 
+                                         by.y = "Id_Prescripcion", all.x = TRUE)
 
 #Cambiando el nombre de las columnas
 #-----------------------------------
 names(TiemposSuministros) = c("Id_Prescripcion","FechaPrescripcion","ConsecutivoTecnologia",
-                   "NoEntrega", "FechaDireccionamiento")
-
-names(TiemposSuministros_NAsIncluidos) = c("Id_Prescripcion","FechaPrescripcion","ConsecutivoTecnologia",
                               "NoEntrega", "FechaDireccionamiento")
 
 #Continuando con la seleccion de datos, uniendo las diferentes bases de datos importadas
 #---------------------------------------------------------------------------------------
-TiemposSuministros <- merge(TiemposSuministros, Entregas_20201026, by = c("Id_Prescripcion",
-                                                    "ConsecutivoTecnologia", "NoEntrega"))
-TiemposSuministros <- merge(TiemposSuministros, Programaciones_20201026, by = c("Id_Prescripcion",
-                                                          "ConsecutivoTecnologia", 
-                                                          "NoEntrega"))
-TiemposSuministros <-merge(TiemposSuministros, ReporteEntregas_20201026, by = c("Id_Prescripcion",
-                                                          "ConsecutivoTecnologia",
-                                                          "NoEntrega"))
-TiemposSuministros <- merge(TiemposSuministros, Suministros_20201026, by = c("Id_Prescripcion",
-                                                          "ConsecutivoTecnologia",
-                                                          "NoEntrega"))
 
-
-#Teniendo en cuenta los NAs
-TiemposSuministros_NAsIncluidos <- merge(TiemposSuministros_NAsIncluidos, 
-                                         Entregas_20201026, by = c("Id_Prescripcion",
+TiemposSuministros <- merge(TiemposSuministros, 
+                                         Entregas_20201130, by = c("Id_Prescripcion",
                                                                    "ConsecutivoTecnologia", 
                                                                    "NoEntrega"), all.x = TRUE)
                                          
-TiemposSuministros_NAsIncluidos <- merge(TiemposSuministros_NAsIncluidos, 
-                                         Programaciones_20201026, by = c("Id_Prescripcion", 
+TiemposSuministros <- merge(TiemposSuministros, 
+                                         Programaciones_20201130, by = c("Id_Prescripcion", 
                                                                          "ConsecutivoTecnologia", 
-                                                                         "NoEntrega"), 
-                                         all.x = TRUE)
+                                                                         "NoEntrega"), all.x = TRUE)
 
-TiemposSuministros_NAsIncluidos <-merge(TiemposSuministros_NAsIncluidos, 
-                                        ReporteEntregas_20201026, by = c("Id_Prescripcion",
+TiemposSuministros <-merge(TiemposSuministros, 
+                                        ReporteEntregas_20201130, by = c("Id_Prescripcion",
                                                                           "ConsecutivoTecnologia",
-                                                                          "NoEntrega"), 
-                                        all.x = TRUE)
+                                                                          "NoEntrega"), all.x = TRUE)
 
-TiemposSuministros_NAsIncluidos <- merge(TiemposSuministros_NAsIncluidos, 
-                                         Suministros_20201026, by = c("Id_Prescripcion",
+TiemposSuministros <- merge(TiemposSuministros, 
+                                         Suministros_20201130, by = c("Id_Prescripcion",
                                                                       "ConsecutivoTecnologia",
-                                                                      "NoEntrega")
-                                         , all.x = TRUE)
+                                                                      "NoEntrega"), all.x = TRUE)
 
 
 #Convirtiendo las variables de fecha en "Date"
@@ -111,18 +90,10 @@ TiemposSuministros$FechaProgramacion <- as.Date(TiemposSuministros$FechaPrograma
 TiemposSuministros$FechaReporteEntrega <- as.Date(TiemposSuministros$FechaReporteEntrega)
 TiemposSuministros$FechaSuministro <- as.Date(TiemposSuministros$FechaSuministro)
 
-TiemposSuministros_NAsIncluidos$FechaDireccionamiento <- as.Date(TiemposSuministros_NAsIncluidos$FechaDireccionamiento)
-TiemposSuministros_NAsIncluidos$FechaEntrega <- as.Date(TiemposSuministros_NAsIncluidos$FechaEntrega)
-TiemposSuministros_NAsIncluidos$FechaPrescripcion <- as.Date(TiemposSuministros_NAsIncluidos$FechaPrescripcion)
-TiemposSuministros_NAsIncluidos$FechaProgramacion <- as.Date(TiemposSuministros_NAsIncluidos$FechaProgramacion)
-TiemposSuministros_NAsIncluidos$FechaReporteEntrega <- as.Date(TiemposSuministros_NAsIncluidos$FechaReporteEntrega)
-TiemposSuministros_NAsIncluidos$FechaSuministro <- as.Date(TiemposSuministros_NAsIncluidos$FechaSuministro)
-
-
 #Seleccionando datos de prescripción
 #-----------------------------------
-DataPrescripcion <- select(Prescripciones_20201026, ID_Prescripcion, CodDANEMunIPS, 
-                           CodDxPpal, CodEPS)
+DataPrescripcion <- select(Prescripciones_20201130, ID_Prescripcion, CodDANEMunIPS, 
+                           CodDxPpal, CodEPS, CodAmbAte)
 
 #Uniendo los datos de prescripción con las otras de TiemposSuministros
 #---------------------------------------------------------------------
@@ -131,25 +102,26 @@ TiemposSuministros <- merge(TiemposSuministros, DataPrescripcion, by.x = "Id_Pre
 
 #Creando una nueva variable para determinar tiempo de respuesta
 #--------------------------------------------------------------
-TiemposSuministros$Diferencia <- as.double(TiemposSuministros$FechaSuministro - 
+TiemposSuministros$DiferenciaFechaSum <- as.double(TiemposSuministros$FechaSuministro - 
                                              TiemposSuministros$FechaPrescripcion)
+
+TiemposSuministros$DiferenciaFechaEnt <- as.double(TiemposSuministros$FechaEntrega - 
+                                                     TiemposSuministros$FechaPrescripcion)
+
+
 
 #Incluyendo el nombre del municipio
 #----------------------------------
 TiemposSuministros <- merge(TiemposSuministros, Municipios_DANE, by.x = "CodDANEMunIPS", 
-                            by.y = "CODIGO_MUNICIPIO")
+                            by.y = "CODIGO_MUNICIPIO", all.x =TRUE)
 
 #Creando un dataframe con sólo las primeras entregas de los medicamentos
 #-----------------------------------------------------------------------
 PrimeraEntregaSuministros <- filter(TiemposSuministros, NoEntrega == "1")
 
-PrimeraEntregaSuministros_NAsIncluidos <- filter(TiemposSuministros_NAsIncluidos, NoEntrega == "1")
-
 #Exportando el dataframe de las primeras entregas
 #------------------------------------------------
 write.csv(PrimeraEntregaSuministros, file = "PrimeraEntregaSuministros.csv")
-
-write.csv(PrimeraEntregaSuministros_NAsIncluidos, file = "PrimeraEntregaSuministros_NAsIncluidos.csv")
 
 #Se importa el anterior DF para disminuir el tamaño del environment
 #----------------------------------------------------------------------------------------------
@@ -171,7 +143,6 @@ PrimeraEntregaSuministros <- read_csv("PrimeraEntregaSuministros.csv",
 #-----------------------------------------
 spark_available_versions()
 spark_install(version = "3.0.0")
-print(spark_version(sc=spark_conn))
 
 #Creando configuración para uso ampliado de memoria
 #--------------------------------------------------
@@ -184,6 +155,8 @@ conf$spark.memory.fraction <- 0.9
 #Conectando al cluster de Spark
 #------------------------------
 spark_conn <- spark_connect(master="local", config = conf)
+
+print(spark_version(sc=spark_conn))
 
 # Copiando datos a Spark
 #-----------------------
