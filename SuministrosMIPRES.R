@@ -20,25 +20,25 @@ tinytex::install_tinytex()
 
 #Importando los datos
 #--------------------
-Suministros_20201231 <- read_delim("Suministros_20201231.txt", 
+Suministros_20210228 <- read_delim("Suministros_20210228.txt", 
                                      "|", escape_double = FALSE, trim_ws = TRUE)
 
-ReporteEntregas_20201231 <- read_delim("ReporteEntregas_20201231.txt", 
+ReporteEntregas_20210228 <- read_delim("ReporteEntregas_20210228.txt", 
                                          "|", escape_double = FALSE, trim_ws = TRUE)
 
-Entregas_20201231 <- read_delim("Entregas_20201231.txt", 
+Entregas_20210228 <- read_delim("Entregas_20210228.txt", 
                                 "|", escape_double = FALSE, trim_ws = TRUE)
 
-Programaciones_20201231 <- read_delim("Programaciones_20201231.txt", 
+Programaciones_20210228 <- read_delim("Programaciones_20210228.txt", 
                                       "|", escape_double = FALSE, trim_ws = TRUE)
 
-Direccionamientos_20201231 <- read_delim("Direccionamientos_20201231.txt", 
+Direccionamientos_20210228 <- read_delim("Direccionamientos_20210228.txt", 
                                          "|", escape_double = FALSE, trim_ws = TRUE)
 
-Medicamentos_20201231 <- read_delim("Medicamentos_20201231.txt", 
+Medicamentos_20210228 <- read_delim("Medicamentos_20210228.txt", 
                                     "|", escape_double = FALSE, trim_ws = TRUE)
 
-Prescripciones_20201231 <- read_delim("Prescripciones_20201231.txt", 
+Prescripciones_20210228 <- read_delim("Prescripciones_20210228.txt", 
                                       "|", escape_double = FALSE, trim_ws = TRUE)
 
 Municipios_DANE <- read_delim("municipios.csv", 
@@ -46,9 +46,9 @@ Municipios_DANE <- read_delim("municipios.csv",
 
 #Filtran los datos y seleccionando los necesarios para el análisis
 #-----------------------------------------------------------------
-TiemposSuministros <- filter(Prescripciones_20201231, EstPres == 4)
+TiemposSuministros <- filter(Prescripciones_20210228, EstPres == 4)
 TiemposSuministros <- select(TiemposSuministros, ID_Prescripcion, FPrescripcion)
-TiemposSuministros <- merge(TiemposSuministros, Direccionamientos_20201231, 
+TiemposSuministros <- merge(TiemposSuministros, Direccionamientos_20210228, 
                                          by.x = "ID_Prescripcion", 
                                          by.y = "Id_Prescripcion", all.x = TRUE)
 
@@ -61,22 +61,22 @@ names(TiemposSuministros) = c("Id_Prescripcion","FechaPrescripcion","Consecutivo
 #---------------------------------------------------------------------------------------
 
 TiemposSuministros <- merge(TiemposSuministros, 
-                                         Entregas_20201231, by = c("Id_Prescripcion",
+                                         Entregas_20210228, by = c("Id_Prescripcion",
                                                                    "ConsecutivoTecnologia", 
                                                                    "NoEntrega"), all.x = TRUE)
                                          
 TiemposSuministros <- merge(TiemposSuministros, 
-                                         Programaciones_20201231, by = c("Id_Prescripcion", 
+                                         Programaciones_20210228, by = c("Id_Prescripcion", 
                                                                          "ConsecutivoTecnologia", 
                                                                          "NoEntrega"), all.x = TRUE)
 
 TiemposSuministros <-merge(TiemposSuministros, 
-                                        ReporteEntregas_20201231, by = c("Id_Prescripcion",
+                                        ReporteEntregas_20210228, by = c("Id_Prescripcion",
                                                                           "ConsecutivoTecnologia",
                                                                           "NoEntrega"), all.x = TRUE)
 
 TiemposSuministros <- merge(TiemposSuministros, 
-                                         Suministros_20201231, by = c("Id_Prescripcion",
+                                         Suministros_20210228, by = c("Id_Prescripcion",
                                                                       "ConsecutivoTecnologia",
                                                                       "NoEntrega"), all.x = TRUE)
 
@@ -92,7 +92,7 @@ TiemposSuministros$FechaSuministro <- as.Date(TiemposSuministros$FechaSuministro
 
 #Seleccionando datos de prescripción
 #-----------------------------------
-DataPrescripcion <- select(Prescripciones_20201231, ID_Prescripcion, CodDANEMunIPS, 
+DataPrescripcion <- select(Prescripciones_20210228, ID_Prescripcion, CodDANEMunIPS, 
                            CodDxPpal, CodEPS, CodAmbAte)
 
 #Uniendo los datos de prescripción con las otras de TiemposSuministros
@@ -195,9 +195,4 @@ PrimeraEntrega2020_tbl %>%
             minDiferencia = min(Diferencia),
             numPresc = n_distinct(Id_Prescripcion)
             )
-
-
-#Contando las prescripciones sin tiempo de suministro
-#----------------------------------------------------
-
 
